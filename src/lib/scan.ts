@@ -125,9 +125,39 @@ Use web search. Report only what you actually find, with sources. If nothing is 
   return "(presence sweep did not complete)";
 }
 
+// When the site can't be crawled at all, research it via web search so the
+// scan still completes; the report flags the blocked crawl as a finding.
+async function researchBusiness(domain: string): Promise<string> {
+  const messages: Anthropic.Beta.BetaMessageParam[] = [
+    {
+      role: "user",
+      content: `Research the business behind the website ${domain} using web search: what they do, what category of business they are, where they are located, and what services they offer. Report plainly what you find with sources. If little is found, say so.`,
+    },
+  ];
+  for (let i = 0; i < 4; i++) {
+    const response = await client.beta.messages.create({
+      model: MODEL_QUERIES,
+      max_tokens: 3000,
+      ...FALLBACK_OPTS,
+      output_config: { effort: "low" },
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 5 }],
+      messages,
+    });
+    if (response.stop_reason === "pause_turn") {
+      messages.push({ role: "assistant", content: response.content });
+      continue;
+    }
+    return textOf(response);
+  }
+  return "(no research available)";
+}
+
 function crawlSummary(c: CrawlResult): string {
   return [
     `URL: ${c.finalUrl} (HTTP ${c.status}, TTFB ${c.ttfbMs}ms)`,
+    c.botBlocked
+      ? "IMPORTANT: the site REFUSED our identified crawler bot (403-class response) and only responded to a browser user agent. AI crawlers such as GPTBot, ClaudeBot, and PerplexityBot are very likely blocked the same way, which directly suppresses AI search visibility. Treat this as a significant negative finding with its own fix (allow reputable AI crawlers in the WAF/robots rules)."
+      : "",
     `Title: ${c.title}`,
     `Meta description: ${c.metaDescription || "(none)"}`,
     `Homepage word count: ${c.wordCount}`,
@@ -169,16 +199,25 @@ export async function runScan(
   const composeModel = lite ? MODEL_QUERIES : MODEL_COMPOSE;
   try {
     await updateScan(scanId, { status: "running", step: "Reading your website", progress: 5 });
-    const crawled = await crawl(url);
+    let crawled: CrawlResult | null = null;
+    let crawlError: string | null = null;
+    try {
+      crawled = await crawl(url);
+    } catch (err) {
+      crawlError = err instanceof Error ? err.message : "crawl failed";
+    }
 
     // agent-readiness check (is-agentic.com) runs in parallel with everything else
-    const agenticPromise = fetchAgenticReport(crawled.finalUrl);
+    const agenticPromise = fetchAgenticReport(crawled?.finalUrl ?? url);
 
     await updateScan(scanId, { step: "Understanding your business", progress: 15 });
+    const profileSource = crawled
+      ? crawlSummary(crawled)
+      : `THE SITE COULD NOT BE CRAWLED (${crawlError}). Web research about the business instead:\n${await researchBusiness(domain)}`;
     const profile = await structured<Profile>(
       ProfileSchema,
       "You analyze a business website and produce a structured profile. buying_queries must be questions a real consumer would ask an AI assistant when ready to buy - include the location when the business is local.",
-      crawlSummary(crawled),
+      profileSource,
       "low",
       composeModel
     );
@@ -242,7 +281,11 @@ export async function runScan(
       `You produce an AI Search Visibility report for a business owner. Never use em dashes in any output text. Score honestly from evidence - do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix, and a fix_prompt - a complete standalone prompt the owner pastes into Claude Code to implement the fix on their website. Each fix_prompt must name their actual domain, cite the concrete problems found (their real headings, missing schema types, actual page issues), and describe the desired end state; for non-code fixes it should generate the action plan or draft the content instead. Write fix_prompts as if the reader will paste them with zero other context. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; assistants[] must have one entry per assistant that answered (names copied verbatim from the [bracketed] labels), each with mentioned=true only if THAT assistant's answer recommended this business; top-level mentioned=true if any assistant did; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
       [
         `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}`,
-        `\nTECHNICAL CRAWL:\n${crawlSummary(crawled)}`,
+        `\nTECHNICAL CRAWL:\n${
+          crawled
+            ? crawlSummary(crawled)
+            : `THE SITE COULD NOT BE CRAWLED AT ALL (${crawlError}). It refused both an identified bot AND a normal browser request from our servers. This means AI crawlers (GPTBot, ClaudeBot, PerplexityBot) are almost certainly blocked too, which severely suppresses AI search visibility. Score the on-site factors (depth, structure, freshness, faq, speed) conservatively as unverifiable, say the check was blocked, and make unblocking reputable AI crawlers the single highest-priority fix.`
+        }`,
         `\nAI ASSISTANT ANSWERS TO BUYING QUERIES:\n${visibility
           .map(
             (v) =>
