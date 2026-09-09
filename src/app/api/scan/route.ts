@@ -106,7 +106,15 @@ export async function POST(req: NextRequest) {
       });
     });
   } else {
-    after(() => runScan(scanId, target.url.toString(), domain));
+    // Geo-tiered cost control: countries in LITE_SCAN_COUNTRIES get the
+    // lighter pipeline (fewer queries, cheaper models).
+    const country = req.headers.get("x-vercel-ip-country")?.toUpperCase() ?? "";
+    const liteCountries = (process.env.LITE_SCAN_COUNTRIES ?? "IN")
+      .split(",")
+      .map((c) => c.trim().toUpperCase())
+      .filter(Boolean);
+    const lite = liteCountries.includes(country);
+    after(() => runScan(scanId, target.url.toString(), domain, { lite }));
   }
 
   return NextResponse.json({ scanId });

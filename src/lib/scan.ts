@@ -48,10 +48,11 @@ async function structured<T>(
   schema: Parameters<typeof zodOutputFormat>[0],
   system: string,
   user: string,
-  effort: "low" | "high"
+  effort: "low" | "high",
+  model: string = MODEL_COMPOSE
 ): Promise<T> {
   const response = await client.beta.messages.create({
-    model: MODEL_COMPOSE,
+    model,
     max_tokens: 16000,
     ...FALLBACK_OPTS,
     output_config: { format: zodOutputFormat(schema), effort },
@@ -156,7 +157,16 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-export async function runScan(scanId: string, url: string, domain: string): Promise<void> {
+export async function runScan(
+  scanId: string,
+  url: string,
+  domain: string,
+  opts: { lite?: boolean } = {}
+): Promise<void> {
+  // Lite tier (geo-based cost control): fewer queries, cheaper composition,
+  // no presence sweep, no extra assistants. Still a real, honest report.
+  const lite = opts.lite === true;
+  const composeModel = lite ? MODEL_QUERIES : MODEL_COMPOSE;
   try {
     await updateScan(scanId, { status: "running", step: "Reading your website", progress: 5 });
     const crawled = await crawl(url);
@@ -169,7 +179,8 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
       ProfileSchema,
       "You analyze a business website and produce a structured profile. buying_queries must be questions a real consumer would ask an AI assistant when ready to buy - include the location when the business is local.",
       crawlSummary(crawled),
-      "low"
+      "low",
+      composeModel
     );
 
     await updateScan(scanId, { step: "Finding what your customers actually search", progress: 22 });
@@ -183,7 +194,8 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
           `BUSINESS PROFILE:\n${JSON.stringify({ ...profile, buying_queries: undefined }, null, 2)}`,
           `\nREAL AUTOCOMPLETE PHRASES (actual searches people type):\n${demand.map((d) => `- "${d.phrase}" (from seed "${d.seed}")`).join("\n")}`,
         ].join("\n"),
-        "low"
+        "low",
+        composeModel
       );
     } else {
       // no demand data reachable - fall back to profiler-inferred queries, labeled as such
@@ -194,7 +206,7 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
         })),
       };
     }
-    const planQueries = plan.queries.slice(0, 8);
+    const planQueries = plan.queries.slice(0, lite ? 4 : 8);
 
     await updateScan(scanId, {
       step: "Asking AI assistants your customers' buying questions",
@@ -202,7 +214,7 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     });
     let completed = 0;
     const visibility = await mapWithConcurrency(planQueries, 4, async (q) => {
-      const orModels = openRouterModels();
+      const orModels = lite ? [] : openRouterModels();
       const [claude, ...others] = await Promise.all([
         runVisibilityQuery(q.query),
         ...orModels.map((m) => askOpenRouter(m.model, consumerPrompt(q.query))),
@@ -220,7 +232,9 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     });
 
     await updateScan(scanId, { step: "Checking your web presence and citations", progress: 70 });
-    const presence = await runPresenceSweep(profile, domain);
+    const presence = lite
+      ? "(Presence sweep not run for this scan. Score presence factors conservatively from crawl signals only and note the check was indirect.)"
+      : await runPresenceSweep(profile, domain);
 
     await updateScan(scanId, { step: "Scoring and writing your report", progress: 85 });
     const report = await structured<Report>(
@@ -238,7 +252,8 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
           .join("\n\n")}`,
         `\nWEB PRESENCE FINDINGS:\n${presence}`,
       ].join("\n"),
-      "high"
+      "high",
+      composeModel
     );
 
     // re-attach demand evidence from the plan in case the composer paraphrased it
