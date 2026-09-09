@@ -315,7 +315,7 @@ export default function Funnel() {
       </div>
 
       <footer className="px-6 py-4 text-center text-xs text-white/25">
-        aisearchhelpers.com · One free scan per business · We never sell your info
+        aisearchhelpers.com · One free scan per business
       </footer>
     </main>
   );

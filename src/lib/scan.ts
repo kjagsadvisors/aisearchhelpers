@@ -12,6 +12,8 @@ import {
   type Report,
 } from "./types";
 import { realDemandPhrases } from "./demand";
+import { fetchAgenticReport } from "./agentic";
+import type { FullReport } from "./types";
 
 // Model per stage, overridable by env. The queries stage runs 8+ calls with web
 // search — on a low rate-limit API tier, set SCAN_MODEL_QUERIES to a smaller
@@ -156,6 +158,9 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     await updateScan(scanId, { status: "running", step: "Reading your website", progress: 5 });
     const crawled = await crawl(url);
 
+    // agent-readiness check (is-agentic.com) runs in parallel with everything else
+    const agenticPromise = fetchAgenticReport(crawled.finalUrl);
+
     await updateScan(scanId, { step: "Understanding your business", progress: 15 });
     const profile = await structured<Profile>(
       ProfileSchema,
@@ -226,11 +231,17 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
       v.backed_by = backing.get(v.query.toLowerCase()) ?? v.backed_by;
     }
 
+    const agentic = await agenticPromise;
+    const fullReport: FullReport = {
+      ...report,
+      ...(agentic ? { agent_readiness: agentic } : {}),
+    };
+
     await updateScan(scanId, {
       status: "done",
       step: "Done",
       progress: 100,
-      report,
+      report: fullReport,
       completed_at: new Date().toISOString(),
     });
 

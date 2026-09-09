@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Search Helpers
 
-## Getting Started
+Free AI search visibility scanner + lead funnel. Enter a website, and it asks AI
+assistants the buying questions that business's customers actually search — then
+scores the site against the nine factors that drive AI citations and delivers a
+report with receipts.
 
-First, run the development server:
+Live at [aisearchhelpers.com](https://aisearchhelpers.com).
+
+## How a scan works
+
+1. **Crawl** — fetches the homepage, sitemap, JSON-LD schema, and measures response time (SSRF-guarded, public hosts only).
+2. **Profile** — Claude infers the business's category, location, and services.
+3. **Real demand** — pulls Google Autocomplete phrases seeded from those services. Autocomplete suggestions only exist because real people type them, so every tested query is grounded in live search demand (and labeled honestly when it isn't).
+4. **Visibility queries** — asks an AI assistant (with live web search) each buying question and records whether the business is recommended, and who is recommended instead.
+5. **Presence sweep** — checks review platforms, Reddit/Quora mentions, and third-party citations.
+6. **Agent readiness** — pulls the site's score from the open [is-agentic.com](https://is-agentic.com) scanner.
+7. **Compose** — scores the nine citation factors (from [SE Ranking's 129k-site study](https://seranking.com/blog/how-to-optimize-for-chatgpt/)) with evidence and a concrete fix each.
+
+The funnel is typeform-style: the scan kicks off the moment an email is
+submitted and runs while the remaining steps collect the lead, so the report is
+ready (or nearly) when the form ends. No fake progress bars.
+
+## Stack
+
+Next.js (App Router) · Claude API (Opus 5, with per-stage model overrides) ·
+Supabase (or a zero-config in-memory store for local dev) · Resend · Tailwind.
+
+## Run it
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in at least ANTHROPIC_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With no Supabase env vars it runs on an in-memory store (data lost on restart).
+`POST /api/dev/seed` creates a sample report in dev for styling work.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+See [.env.example](.env.example) for all configuration, and
+[supabase/migration.sql](supabase/migration.sql) for the schema.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Abuse controls
 
-## Learn More
+Email MX + disposable-domain validation, per-IP and global daily scan caps,
+7-day per-domain report cache, SSRF guards on every crawl hop, optional
+Cloudflare Turnstile.
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

@@ -60,6 +60,17 @@ export const ReportSchema = z.object({
 });
 export type Report = z.infer<typeof ReportSchema>;
 
+// Agent-readiness summary from is-agentic.com — attached after composition,
+// not produced by the composer.
+export interface AgenticSummary {
+  score: number | null;
+  score_label: string;
+  report_url: string;
+  top_issues: { name: string; recommendation: string | null }[];
+}
+
+export type FullReport = Report & { agent_readiness?: AgenticSummary };
+
 export type ScanStatus = "queued" | "running" | "done" | "error";
 
 export interface ScanRow {
@@ -70,7 +81,7 @@ export interface ScanRow {
   status: ScanStatus;
   step: string | null;
   progress: number;
-  report: Report | null;
+  report: FullReport | null;
   error: string | null;
   created_at: string;
   completed_at: string | null;

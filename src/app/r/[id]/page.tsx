@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { store } from "@/lib/store";
-import type { Report } from "@/lib/types";
+import type { FullReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +29,7 @@ export default async function ReportPage({
   const data = await store().getScan(id);
   if (!data || data.status !== "done" || !data.report) notFound();
 
-  const report = data.report as Report;
+  const report = data.report as FullReport;
   const missed = report.visibility.filter((v) => !v.mentioned);
   const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL;
 
@@ -141,6 +141,41 @@ export default async function ReportPage({
             ))}
           </div>
         </section>
+
+        {/* Agent readiness (is-agentic.com) */}
+        {report.agent_readiness && (
+          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">AI Agent Readiness</h2>
+              {report.agent_readiness.score !== null && (
+                <p className={`text-2xl font-bold ${scoreColor(report.agent_readiness.score)}`}>
+                  {report.agent_readiness.score}
+                  <span className="text-sm text-white/30">/100</span>
+                </p>
+              )}
+            </div>
+            <p className="text-sm text-white/60">
+              How well your site works when an AI agent tries to use it — {report.agent_readiness.score_label.toLowerCase()}.
+            </p>
+            {report.agent_readiness.top_issues.length > 0 && (
+              <ul className="space-y-2">
+                {report.agent_readiness.top_issues.map((issue) => (
+                  <li key={issue.name} className="text-xs text-white/60">
+                    <span className="text-white/85 font-medium">{issue.name}</span>
+                    {issue.recommendation && <> — {issue.recommendation}</>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="text-[11px] text-white/30">
+              Powered by the open{" "}
+              <a href={report.agent_readiness.report_url} className="underline" target="_blank" rel="noopener noreferrer">
+                is-agentic.com
+              </a>{" "}
+              scanner.
+            </p>
+          </section>
+        )}
 
         {/* Summary */}
         <section className="space-y-3">

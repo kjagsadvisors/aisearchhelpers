@@ -2,7 +2,7 @@
 // dev store so the funnel runs locally with zero setup (data lost on restart).
 import { randomUUID } from "node:crypto";
 import { serviceClient } from "./supabase";
-import type { Report, ScanStatus } from "./types";
+import type { FullReport, ScanStatus } from "./types";
 
 export interface Lead {
   id: string;
@@ -25,7 +25,7 @@ export interface Scan {
   status: ScanStatus;
   step: string | null;
   progress: number;
-  report: Report | null;
+  report: FullReport | null;
   error: string | null;
   created_at: string;
   completed_at: string | null;
@@ -41,7 +41,7 @@ export interface Store {
   countRecentByIp(ip: string, sinceIso: string): Promise<number>;
   countScansSince(sinceIso: string): Promise<number>;
   recordRateEvents(ip: string, email: string): Promise<void>;
-  findCachedReport(domain: string, sinceIso: string): Promise<Report | null>;
+  findCachedReport(domain: string, sinceIso: string): Promise<FullReport | null>;
 }
 
 function supabaseConfigured(): boolean {
@@ -119,7 +119,7 @@ const supabaseStore: Store = {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    return (data?.report as Report) ?? null;
+    return (data?.report as FullReport) ?? null;
   },
 };
 
