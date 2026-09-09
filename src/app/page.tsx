@@ -154,15 +154,12 @@ export default function Funnel() {
           <div className="max-w-3xl mx-auto pt-14 sm:pt-20 pb-24 space-y-20">
             {/* Hero */}
             <section className="text-center space-y-6">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-a30)] bg-[var(--accent-a10)] px-4 py-1.5 text-xs font-medium text-[var(--accent-hover)]">
-                Free AI Search Visibility Report
-              </span>
               <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
                 Is your business <span className="text-[var(--accent)]">invisible</span> in ChatGPT?
               </h1>
               <p className="text-white/55 text-lg max-w-xl mx-auto">
-                Your customers now ask AI who to hire. We ask it the same questions, then show
-                you exactly who gets recommended instead of you.
+                Your customers ask ChatGPT who to hire. Put your website in and we&apos;ll show
+                you who it recommends. It&apos;s probably not you.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
                 <input
@@ -179,13 +176,11 @@ export default function Funnel() {
                   onClick={advance}
                   className="bg-[var(--accent)] text-black font-semibold rounded-xl px-7 py-4 hover:bg-[var(--accent-hover)] transition-colors whitespace-nowrap"
                 >
-                  Analyze my site →
+                  Run my free scan
                 </button>
               </div>
               {error && <p className="text-sm text-red-400">{error}</p>}
-              <p className="text-xs text-white/30">
-                Real search data · Live AI answers · Report ready in about 2 minutes
-              </p>
+              <p className="text-xs text-white/30">Free. Takes about 2 minutes.</p>
             </section>
 
             {/* How it works */}
@@ -193,18 +188,18 @@ export default function Funnel() {
               {[
                 {
                   n: "1",
-                  t: "We find the real questions",
-                  d: "Not guesses. Actual search phrases people type when they're ready to buy what you sell.",
+                  t: "Real questions",
+                  d: "We pull the searches people actually type when they're ready to buy from a business like yours.",
                 },
                 {
                   n: "2",
-                  t: "We ask AI assistants live",
-                  d: "Each question goes to an AI assistant with web search, exactly how your customers ask it. We record who gets recommended.",
+                  t: "Real answers",
+                  d: "We ask the AI assistants live, with web search on, and write down every business they recommend.",
                 },
                 {
                   n: "3",
-                  t: "You get the report and the fixes",
-                  d: "A score across the 9 factors that drive AI citations, and every fix ships with a ready-to-paste Claude Code prompt.",
+                  t: "Real fixes",
+                  d: "You get a scored report. Each problem comes with a prompt you can paste into Claude Code to fix it.",
                 },
               ].map((s) => (
                 <div key={s.n} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
@@ -221,26 +216,14 @@ export default function Funnel() {
             <section className="grid sm:grid-cols-2 gap-8 items-center">
               <div className="space-y-4 text-left">
                 <h2 className="font-display text-2xl font-bold tracking-tight">
-                  See who AI recommends when your customers ask.
+                  The report names names.
                 </h2>
                 <p className="text-white/50 text-sm leading-relaxed">
-                  Every report shows the exact prompts we used (paste them into ChatGPT and
-                  check us), the competitors recommended in your place, your score on the 9
-                  factors that drive AI citations, and your 3 highest-impact fixes. Backed by a
-                  study of 129,000 websites.
+                  Which competitors the AI recommended instead of you, on which questions, and
+                  why. Every prompt we used is in the report, so you can paste it into ChatGPT
+                  yourself and watch it happen. Then it tells you what to change, with the
+                  Claude Code prompt to change it.
                 </p>
-                <ul className="space-y-2 text-sm text-white/70">
-                  {[
-                    "Grounded in real searches, not invented questions",
-                    "Copy-paste Claude Code prompts to fix every finding",
-                    "AI agent-readiness score included",
-                  ].map((li) => (
-                    <li key={li} className="flex gap-2.5 items-start">
-                      <span className="text-[var(--accent)] mt-0.5">✓</span>
-                      {li}
-                    </li>
-                  ))}
-                </ul>
               </div>
               {/* stylized mini report */}
               <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
@@ -280,7 +263,7 @@ export default function Funnel() {
             {/* Bottom CTA */}
             <section className="text-center space-y-4">
               <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
-                Find out in 2 minutes. Fix it this quarter.
+                Two minutes to find out.
               </h2>
               <button
                 onClick={() => {
@@ -289,7 +272,7 @@ export default function Funnel() {
                 }}
                 className="bg-[var(--accent)] text-black font-semibold rounded-xl px-8 py-4 hover:bg-[var(--accent-hover)] transition-colors"
               >
-                Get my free report
+                Run my free scan
               </button>
             </section>
           </div>

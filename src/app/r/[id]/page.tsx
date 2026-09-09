@@ -72,15 +72,32 @@ export default async function ReportPage({
               >
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-sm text-white/80">&ldquo;{v.query}&rdquo;</p>
-                  <span
-                    className={`shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${
-                      v.mentioned
-                        ? "bg-[var(--accent-a15)] text-[var(--accent-hover)]"
-                        : "bg-red-400/15 text-red-300"
-                    }`}
-                  >
-                    {v.mentioned ? "Mentioned" : "Not mentioned"}
-                  </span>
+                  <div className="shrink-0 flex flex-wrap justify-end gap-1.5">
+                    {v.assistants?.length ? (
+                      v.assistants.map((a) => (
+                        <span
+                          key={a.name}
+                          className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
+                            a.mentioned
+                              ? "bg-[var(--accent-a15)] text-[var(--accent-hover)]"
+                              : "bg-red-400/15 text-red-300"
+                          }`}
+                        >
+                          {a.name} {a.mentioned ? "✓" : "✗"}
+                        </span>
+                      ))
+                    ) : (
+                      <span
+                        className={`text-xs font-semibold rounded-full px-2.5 py-1 ${
+                          v.mentioned
+                            ? "bg-[var(--accent-a15)] text-[var(--accent-hover)]"
+                            : "bg-red-400/15 text-red-300"
+                        }`}
+                      >
+                        {v.mentioned ? "Mentioned" : "Not mentioned"}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {!v.mentioned && v.recommended_instead.length > 0 && (
                   <p className="text-xs text-white/40">

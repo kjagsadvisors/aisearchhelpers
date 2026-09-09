@@ -40,7 +40,12 @@ export const ReportSchema = z.object({
     z.object({
       query: z.string(),
       backed_by: z.string().describe("Copied verbatim from the query plan"),
-      mentioned: z.boolean(),
+      mentioned: z.boolean().describe("true if ANY assistant recommended this business"),
+      assistants: z
+        .array(z.object({ name: z.string(), mentioned: z.boolean() }))
+        .describe(
+          "One entry per assistant asked (copy names verbatim from the input, e.g. 'Claude', 'ChatGPT (GPT-4o)'); mentioned=true only if that assistant's own answer recommended this business"
+        ),
       recommended_instead: z.array(z.string()),
     })
   ),

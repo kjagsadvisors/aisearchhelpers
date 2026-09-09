@@ -13,6 +13,7 @@ import {
 } from "./types";
 import { realDemandPhrases } from "./demand";
 import { fetchAgenticReport } from "./agentic";
+import { askOpenRouter, openRouterEnabled, OPENROUTER_ASSISTANT_LABEL } from "./openrouter";
 import type { FullReport } from "./types";
 
 // Model per stage, overridable by env. The queries stage runs 8+ calls with web
@@ -62,13 +63,14 @@ async function structured<T>(
   return JSON.parse(textOf(response)) as T;
 }
 
+function consumerPrompt(query: string): string {
+  return `A consumer asks an AI assistant: "${query}"\n\nAnswer exactly as a helpful AI assistant would: recommend specific, named businesses or providers (use web search to find real current options). Keep it under 200 words.`;
+}
+
 // One buying-intent query answered the way an AI assistant would answer a consumer.
 async function runVisibilityQuery(query: string): Promise<{ query: string; answer: string }> {
   const messages: Anthropic.Beta.BetaMessageParam[] = [
-    {
-      role: "user",
-      content: `A consumer asks an AI assistant: "${query}"\n\nAnswer exactly as a helpful AI assistant would: recommend specific, named businesses or providers (use web search to find real current options). Keep it under 200 words.`,
-    },
+    { role: "user", content: consumerPrompt(query) },
   ];
   for (let i = 0; i < 4; i++) {
     const response = await client.beta.messages.create({
@@ -199,12 +201,17 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     });
     let completed = 0;
     const visibility = await mapWithConcurrency(planQueries, 4, async (q) => {
-      const result = await runVisibilityQuery(q.query);
+      const [claude, gpt] = await Promise.all([
+        runVisibilityQuery(q.query),
+        openRouterEnabled() ? askOpenRouter(consumerPrompt(q.query)) : Promise.resolve(null),
+      ]);
       completed++;
       await updateScan(scanId, {
         progress: 30 + Math.round((completed / planQueries.length) * 35),
       });
-      return { ...result, backed_by: q.backed_by };
+      const answers = [{ assistant: "Claude", answer: claude.answer }];
+      if (gpt) answers.push({ assistant: OPENROUTER_ASSISTANT_LABEL, answer: gpt });
+      return { query: q.query, backed_by: q.backed_by, answers };
     });
 
     await updateScan(scanId, { step: "Checking your web presence and citations", progress: 70 });
@@ -213,12 +220,16 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     await updateScan(scanId, { step: "Scoring and writing your report", progress: 85 });
     const report = await structured<Report>(
       ReportSchema,
-      `You produce an AI Search Visibility report for a business owner. Never use em dashes in any output text. Score honestly from evidence - do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix, and a fix_prompt - a complete standalone prompt the owner pastes into Claude Code to implement the fix on their website. Each fix_prompt must name their actual domain, cite the concrete problems found (their real headings, missing schema types, actual page issues), and describe the desired end state; for non-code fixes it should generate the action plan or draft the content instead. Write fix_prompts as if the reader will paste them with zero other context. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
+      `You produce an AI Search Visibility report for a business owner. Never use em dashes in any output text. Score honestly from evidence - do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix, and a fix_prompt - a complete standalone prompt the owner pastes into Claude Code to implement the fix on their website. Each fix_prompt must name their actual domain, cite the concrete problems found (their real headings, missing schema types, actual page issues), and describe the desired end state; for non-code fixes it should generate the action plan or draft the content instead. Write fix_prompts as if the reader will paste them with zero other context. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; assistants[] must have one entry per assistant that answered (names copied verbatim from the [bracketed] labels), each with mentioned=true only if THAT assistant's answer recommended this business; top-level mentioned=true if any assistant did; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
       [
         `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}`,
         `\nTECHNICAL CRAWL:\n${crawlSummary(crawled)}`,
         `\nAI ASSISTANT ANSWERS TO BUYING QUERIES:\n${visibility
-          .map((v) => `Q: ${v.query}\nbacked_by: ${v.backed_by}\nA: ${v.answer}`)
+          .map(
+            (v) =>
+              `Q: ${v.query}\nbacked_by: ${v.backed_by}\n` +
+              v.answers.map((a) => `[${a.assistant}] answered: ${a.answer}`).join("\n")
+          )
           .join("\n\n")}`,
         `\nWEB PRESENCE FINDINGS:\n${presence}`,
       ].join("\n"),
