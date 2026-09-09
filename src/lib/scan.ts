@@ -13,7 +13,7 @@ import {
 } from "./types";
 import { realDemandPhrases } from "./demand";
 import { fetchAgenticReport } from "./agentic";
-import { askOpenRouter, openRouterEnabled, OPENROUTER_ASSISTANT_LABEL } from "./openrouter";
+import { askOpenRouter, openRouterModels } from "./openrouter";
 import type { FullReport } from "./types";
 
 // Model per stage, overridable by env. The queries stage runs 8+ calls with web
@@ -201,16 +201,20 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     });
     let completed = 0;
     const visibility = await mapWithConcurrency(planQueries, 4, async (q) => {
-      const [claude, gpt] = await Promise.all([
+      const orModels = openRouterModels();
+      const [claude, ...others] = await Promise.all([
         runVisibilityQuery(q.query),
-        openRouterEnabled() ? askOpenRouter(consumerPrompt(q.query)) : Promise.resolve(null),
+        ...orModels.map((m) => askOpenRouter(m.model, consumerPrompt(q.query))),
       ]);
       completed++;
       await updateScan(scanId, {
         progress: 30 + Math.round((completed / planQueries.length) * 35),
       });
       const answers = [{ assistant: "Claude", answer: claude.answer }];
-      if (gpt) answers.push({ assistant: OPENROUTER_ASSISTANT_LABEL, answer: gpt });
+      orModels.forEach((m, i) => {
+        const answer = others[i];
+        if (answer) answers.push({ assistant: m.label, answer });
+      });
       return { query: q.query, backed_by: q.backed_by, answers };
     });
 
