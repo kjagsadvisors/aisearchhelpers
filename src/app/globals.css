@@ -20,10 +20,18 @@
   }
 }
 
+/* The site is dark-only: paint the page ground dark so any accidental
+   overflow or overscroll never exposes a white strip. */
+html {
+  background: #0a0a0f;
+  overflow-x: hidden;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #0a0a0f;
+  color: #ededed;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 /* White-label accent - overridden per-brand in layout.tsx via env */

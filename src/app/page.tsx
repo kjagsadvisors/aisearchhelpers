@@ -145,7 +145,7 @@ export default function Funnel() {
     step === "url" ? 1 : step === "email" ? 2 : step === "name" ? 3 : step === "phone" ? 4 : step === "qualifier" ? 5 : 0;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col overflow-x-hidden">
       <header className="px-6 py-5 flex items-center justify-between max-w-3xl mx-auto w-full">
         <Logo />
         {stepIndex > 1 ? (

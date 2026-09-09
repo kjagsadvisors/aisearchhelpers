@@ -26,7 +26,7 @@ function fmtTime(d: Date, tz: string): string {
 }
 
 const inputCls =
-  "w-full bg-white/5 border border-white/15 focus:border-[var(--accent-a60)] rounded-xl px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/25";
+  "w-full bg-white/5 border border-white/15 focus:border-[var(--accent-a60)] rounded-xl px-4 py-3 text-base outline-none transition-colors placeholder:text-white/25";
 
 export interface BookingPrefill {
   name: string;

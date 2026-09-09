@@ -39,7 +39,7 @@ export function LogoMark({ size = 26 }: { size?: number }) {
 export function Logo({ compact = false }: { compact?: boolean }) {
   const { head, tail } = brandWordmark();
   return (
-    <span className="inline-flex items-center gap-2.5">
+    <span className="inline-flex items-center gap-2.5 whitespace-nowrap">
       <LogoMark size={compact ? 22 : 26} />
       <span
         className={`font-display font-bold uppercase leading-none ${

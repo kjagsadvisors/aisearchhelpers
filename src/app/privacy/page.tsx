@@ -5,7 +5,7 @@ export const metadata = { title: `Privacy Policy | ${brand.name}` };
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-white">
+    <main className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
       <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
         <header className="flex items-center justify-between">
           <a href="/">

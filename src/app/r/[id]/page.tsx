@@ -37,11 +37,11 @@ export default async function ReportPage({
   const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL || `/book?scan=${id}`;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-white">
+    <main className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-12">
-        <header className="flex items-center justify-between">
-          <Logo />
-          <span className="text-sm text-white/40">{data.domain}</span>
+        <header className="flex items-center justify-between gap-3">
+          <span className="shrink-0"><Logo /></span>
+          <span className="text-sm text-white/40 truncate min-w-0">{data.domain}</span>
         </header>
 
         {/* Score hero */}
@@ -70,9 +70,9 @@ export default async function ReportPage({
                 key={v.query}
                 className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 flex flex-col gap-1"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                   <p className="text-sm text-white/80">&ldquo;{v.query}&rdquo;</p>
-                  <div className="shrink-0 flex flex-wrap justify-end gap-1.5">
+                  <div className="sm:shrink-0 flex flex-wrap sm:justify-end gap-1.5">
                     {v.assistants?.length ? (
                       v.assistants.map((a) => (
                         <span
@@ -125,7 +125,7 @@ export default async function ReportPage({
                 key={v.query}
                 className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.04] px-4 py-2.5"
               >
-                <code className="text-xs text-white/75">{v.query}</code>
+                <code className="text-xs text-white/75 break-words min-w-0">{v.query}</code>
                 <CopyPrompt text={v.query} />
               </li>
             ))}
@@ -181,7 +181,7 @@ export default async function ReportPage({
                       ▸ Get the Claude Code prompt to fix this
                     </summary>
                     <div className="mt-2 rounded-lg bg-black/40 border border-white/10 p-3 space-y-2">
-                      <pre className="text-[11px] text-white/70 whitespace-pre-wrap font-mono leading-relaxed">{f.fix_prompt}</pre>
+                      <pre className="text-[11px] text-white/70 whitespace-pre-wrap break-words font-mono leading-relaxed">{f.fix_prompt}</pre>
                       <CopyPrompt text={f.fix_prompt} />
                     </div>
                   </details>
