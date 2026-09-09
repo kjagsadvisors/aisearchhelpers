@@ -3,6 +3,7 @@ import { store } from "@/lib/store";
 import { brand } from "@/lib/brand";
 import { Logo } from "@/components/Logo";
 import { CopyPrompt } from "./CopyPrompt";
+import { BookCta } from "./BookCta";
 import type { FullReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -231,6 +232,14 @@ export default async function ReportPage({
           <h2 className="text-lg font-bold">Summary</h2>
           <p className="text-sm text-white/70 leading-relaxed whitespace-pre-line">{report.summary}</p>
         </section>
+
+        <BookCta
+          bookingUrl={bookingUrl ?? `/book?scan=${id}`}
+          scanId={id}
+          score={Math.round(report.overall_score)}
+          missed={missed.length}
+          total={report.visibility.length}
+        />
 
         <footer className="border-t border-white/10 pt-6 pb-10 text-center space-y-4">
           {bookingUrl && (

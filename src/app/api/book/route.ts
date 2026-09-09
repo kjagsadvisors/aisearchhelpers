@@ -4,6 +4,7 @@ import { bookingConfig } from "@/lib/booking-config";
 import { createBooking, getBusyBlocks } from "@/lib/msgraph";
 import { filterAvailable } from "@/lib/slots";
 import { brand } from "@/lib/brand";
+import { serviceClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -77,6 +78,20 @@ export async function POST(req: Request) {
       notes: notes?.trim() || undefined,
       source: brand.domain,
     });
+
+    // record the booking (best-effort) so follow-up emails skip people who booked
+    try {
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        await serviceClient().from("bookings").insert({
+          email: contactEmail.trim().toLowerCase(),
+          name: contactName.trim(),
+          start_utc: start.toISOString(),
+          source: brand.domain,
+        });
+      }
+    } catch (e) {
+      console.error("booking record failed", e);
+    }
 
     const notifyTo = process.env.NOTIFICATION_EMAIL?.trim();
     if (resend && notifyTo) {
