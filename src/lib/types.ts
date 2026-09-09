@@ -14,6 +14,21 @@ export const ProfileSchema = z.object({
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
+// The 8 queries we actually run, each carrying its demand evidence
+export const QueryPlanSchema = z.object({
+  queries: z.array(
+    z.object({
+      query: z.string().describe("The question phrased as a customer would ask an AI assistant"),
+      backed_by: z
+        .string()
+        .describe(
+          "Demand evidence: the exact real autocomplete phrase(s) this query is grounded in, e.g. \"Real searches: 'best plumber annapolis', 'plumber near me annapolis'\". Use 'Inferred from your services (no search data found)' only when nothing matched."
+        ),
+    })
+  ),
+});
+export type QueryPlan = z.infer<typeof QueryPlanSchema>;
+
 // Final report shape — stored as jsonb on the scan row
 export const ReportSchema = z.object({
   business_name: z.string(),
@@ -24,6 +39,7 @@ export const ReportSchema = z.object({
   visibility: z.array(
     z.object({
       query: z.string(),
+      backed_by: z.string().describe("Copied verbatim from the query plan"),
       mentioned: z.boolean(),
       recommended_instead: z.array(z.string()),
     })

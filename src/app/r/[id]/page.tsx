@@ -86,6 +86,9 @@ export default async function ReportPage({
                     Recommended instead: {v.recommended_instead.join(", ")}
                   </p>
                 )}
+                {v.backed_by && (
+                  <p className="text-[11px] text-emerald-300/50">{v.backed_by}</p>
+                )}
               </div>
             ))}
           </div>

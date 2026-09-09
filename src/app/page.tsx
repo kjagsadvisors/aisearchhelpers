@@ -15,6 +15,7 @@ const QUALIFIERS = [
 const STAGES = [
   { at: 5, label: "Reading your website" },
   { at: 15, label: "Understanding your business" },
+  { at: 22, label: "Finding what your customers actually search" },
   { at: 30, label: "Asking AI assistants your customers' buying questions" },
   { at: 70, label: "Checking your web presence and citations" },
   { at: 85, label: "Scoring and writing your report" },

@@ -10,10 +10,10 @@ const SAMPLE: Report = {
   headline:
     "AI assistants recommended your competitors 6 out of 8 times — you're invisible where your customers are now searching.",
   visibility: [
-    { query: "best plumber in Annapolis MD", mentioned: false, recommended_instead: ["Heidler Plumbing", "F.H. Furr"] },
-    { query: "emergency plumber near Annapolis", mentioned: false, recommended_instead: ["Len The Plumber"] },
-    { query: "who should I hire to replace a water heater in Annapolis", mentioned: true, recommended_instead: [] },
-    { query: "reliable drain cleaning company Anne Arundel County", mentioned: false, recommended_instead: ["Roto-Rooter", "Mr. Rooter"] },
+    { query: "best plumber in Annapolis MD", backed_by: "Real searches: 'best plumber annapolis md', 'plumber annapolis'", mentioned: false, recommended_instead: ["Heidler Plumbing", "F.H. Furr"] },
+    { query: "emergency plumber near Annapolis", backed_by: "Real searches: 'emergency plumber near me', '24 hour plumber annapolis'", mentioned: false, recommended_instead: ["Len The Plumber"] },
+    { query: "who should I hire to replace a water heater in Annapolis", backed_by: "Real searches: 'water heater replacement annapolis', 'water heater replacement cost'", mentioned: true, recommended_instead: [] },
+    { query: "reliable drain cleaning company Anne Arundel County", backed_by: "Real searches: 'drain cleaning near me', 'drain cleaning anne arundel county'", mentioned: false, recommended_instead: ["Roto-Rooter", "Mr. Rooter"] },
   ],
   factors: [
     { key: "backlinks", name: "Domain Authority Signals", score: 22, evidence: "Few referring domains detected; site is rarely cited by third parties.", fix: "Earn 2-3 links from local chambers, supplier directories, and trade associations." },

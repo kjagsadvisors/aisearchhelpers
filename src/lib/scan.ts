@@ -3,15 +3,28 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { crawl, type CrawlResult } from "./crawl";
 import { store } from "./store";
 import { sendReportEmail } from "./email";
-import { ProfileSchema, ReportSchema, type Profile, type Report } from "./types";
+import {
+  ProfileSchema,
+  QueryPlanSchema,
+  ReportSchema,
+  type Profile,
+  type QueryPlan,
+  type Report,
+} from "./types";
+import { realDemandPhrases } from "./demand";
 
-const MODEL = "claude-opus-5";
+// Model per stage, overridable by env. The queries stage runs 8+ calls with web
+// search — on a low rate-limit API tier, set SCAN_MODEL_QUERIES to a smaller
+// model (e.g. claude-sonnet-5) to keep total scan time near one minute.
+const MODEL_QUERIES = process.env.SCAN_MODEL_QUERIES ?? "claude-opus-5";
+const MODEL_COMPOSE = process.env.SCAN_MODEL_COMPOSE ?? "claude-opus-5";
 const FALLBACK_OPTS = {
   betas: ["server-side-fallback-2026-07-01"],
   fallbacks: "default" as const,
 };
 
-const client = new Anthropic();
+// Per-call timeout so one stuck request can't hang a scan; SDK still retries inside it.
+const client = new Anthropic({ timeout: 180_000 });
 
 async function updateScan(
   scanId: string,
@@ -34,7 +47,7 @@ async function structured<T>(
   effort: "low" | "high"
 ): Promise<T> {
   const response = await client.beta.messages.create({
-    model: MODEL,
+    model: MODEL_COMPOSE,
     max_tokens: 16000,
     ...FALLBACK_OPTS,
     output_config: { format: zodOutputFormat(schema), effort },
@@ -57,7 +70,7 @@ async function runVisibilityQuery(query: string): Promise<{ query: string; answe
   ];
   for (let i = 0; i < 4; i++) {
     const response = await client.beta.messages.create({
-      model: MODEL,
+      model: MODEL_QUERIES,
       max_tokens: 4000,
       ...FALLBACK_OPTS,
       output_config: { effort: "low" },
@@ -90,7 +103,7 @@ Use web search. Report only what you actually find, with sources. If nothing is 
   ];
   for (let i = 0; i < 4; i++) {
     const response = await client.beta.messages.create({
-      model: MODEL,
+      model: MODEL_QUERIES,
       max_tokens: 4000,
       ...FALLBACK_OPTS,
       output_config: { effort: "low" },
@@ -151,19 +164,42 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
       "low"
     );
 
+    await updateScan(scanId, { step: "Finding what your customers actually search", progress: 22 });
+    const demand = await realDemandPhrases(profile);
+    let plan: QueryPlan;
+    if (demand.length > 0) {
+      plan = await structured<QueryPlan>(
+        QueryPlanSchema,
+        "You select the 8 buying-intent questions to test a business's AI search visibility. You are given REAL Google Autocomplete phrases (evidence of what people actually search) plus the business profile. Prefer queries grounded in the real phrases: pick the ones with clear buying intent relevant to this business, and phrase each as a customer would naturally ask an AI assistant (add the location when the business is local). backed_by must quote the exact real phrase(s) used. Only fall back to inferred queries (max 2) if the real phrases don't cover an important service, and label them honestly.",
+        [
+          `BUSINESS PROFILE:\n${JSON.stringify({ ...profile, buying_queries: undefined }, null, 2)}`,
+          `\nREAL AUTOCOMPLETE PHRASES (actual searches people type):\n${demand.map((d) => `- "${d.phrase}" (from seed "${d.seed}")`).join("\n")}`,
+        ].join("\n"),
+        "low"
+      );
+    } else {
+      // no demand data reachable — fall back to profiler-inferred queries, labeled as such
+      plan = {
+        queries: profile.buying_queries.slice(0, 8).map((q) => ({
+          query: q,
+          backed_by: "Inferred from your services (no search data found)",
+        })),
+      };
+    }
+    const planQueries = plan.queries.slice(0, 8);
+
     await updateScan(scanId, {
       step: "Asking AI assistants your customers' buying questions",
       progress: 30,
     });
-    const queries = profile.buying_queries.slice(0, 8);
     let completed = 0;
-    const visibility = await mapWithConcurrency(queries, 4, async (q) => {
-      const result = await runVisibilityQuery(q);
+    const visibility = await mapWithConcurrency(planQueries, 4, async (q) => {
+      const result = await runVisibilityQuery(q.query);
       completed++;
       await updateScan(scanId, {
-        progress: 30 + Math.round((completed / queries.length) * 35),
+        progress: 30 + Math.round((completed / planQueries.length) * 35),
       });
-      return result;
+      return { ...result, backed_by: q.backed_by };
     });
 
     await updateScan(scanId, { step: "Checking your web presence and citations", progress: 70 });
@@ -172,17 +208,23 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     await updateScan(scanId, { step: "Scoring and writing your report", progress: 85 });
     const report = await structured<Report>(
       ReportSchema,
-      `You produce an AI Search Visibility report for a business owner. Score honestly from evidence — do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
+      `You produce an AI Search Visibility report for a business owner. Score honestly from evidence — do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
       [
         `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}`,
         `\nTECHNICAL CRAWL:\n${crawlSummary(crawled)}`,
         `\nAI ASSISTANT ANSWERS TO BUYING QUERIES:\n${visibility
-          .map((v) => `Q: ${v.query}\nA: ${v.answer}`)
+          .map((v) => `Q: ${v.query}\nbacked_by: ${v.backed_by}\nA: ${v.answer}`)
           .join("\n\n")}`,
         `\nWEB PRESENCE FINDINGS:\n${presence}`,
       ].join("\n"),
       "high"
     );
+
+    // re-attach demand evidence from the plan in case the composer paraphrased it
+    const backing = new Map(visibility.map((v) => [v.query.toLowerCase(), v.backed_by]));
+    for (const v of report.visibility) {
+      v.backed_by = backing.get(v.query.toLowerCase()) ?? v.backed_by;
+    }
 
     await updateScan(scanId, {
       status: "done",
