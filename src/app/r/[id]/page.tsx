@@ -39,7 +39,7 @@ export default async function ReportPage({
 
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-12">
+      <div className="max-w-3xl mx-auto px-6 pt-10 pb-32 space-y-12">
         <header className="flex items-center justify-between gap-3">
           <span className="shrink-0"><Logo /></span>
           <span className="text-sm text-white/40 truncate min-w-0">{data.domain}</span>

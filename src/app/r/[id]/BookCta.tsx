@@ -67,16 +67,16 @@ export function BookCta({
     <>
       {/* sticky bottom bar */}
       {barVisible && !popupOpen && (
-        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#0a0a0f]/95 backdrop-blur px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
-            <p className="text-sm text-white/70 min-w-0 truncate">
-              Missing from {missed} of {total} AI answers.
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#0a0a0f]/95 backdrop-blur">
+          <div className="max-w-3xl mx-auto flex items-center gap-3 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            <p className="flex-1 min-w-0 truncate text-xs sm:text-sm text-white/60">
+              Missing from {missed}/{total} AI answers
             </p>
             <a
               href={bookingUrl}
-              className="shrink-0 bg-[var(--accent)] text-black text-sm font-semibold rounded-lg px-4 py-2.5 hover:bg-[var(--accent-hover)] transition-colors"
+              className="shrink-0 bg-[var(--accent)] text-black text-sm font-semibold rounded-lg px-4 py-2.5 hover:bg-[var(--accent-hover)] transition-colors whitespace-nowrap"
             >
-              Book a free walkthrough
+              Book a walkthrough
             </a>
           </div>
         </div>
