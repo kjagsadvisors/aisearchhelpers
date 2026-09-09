@@ -5,8 +5,7 @@ import BookingWidget from "@/components/BookingWidget";
 
 export const metadata: Metadata = {
   title: `Book your report walkthrough | ${brand.name}`,
-  description:
-    "A quick Teams call. We go through your AI search report together and your highest-impact fixes.",
+  description: "A short Teams call to go over your AI search report.",
 };
 
 export default function BookPage() {
@@ -24,15 +23,15 @@ export default function BookPage() {
             Book your report walkthrough
           </h1>
           <p className="text-white/55">
-            A quick call on Teams. We go through your report together: what it found, which
-            fixes matter most, and what you can do yourself. Bring questions. No pitch deck.
+            Pick a time below. It&apos;s a short Teams call to go over your report and what to
+            fix first.
           </p>
         </div>
 
         <BookingWidget />
 
         <p className="text-xs text-white/30">
-          You&apos;ll get a calendar invite with a Teams link the moment you pick a time.
+          You&apos;ll get a calendar invite with the Teams link right away.
         </p>
       </div>
     </main>
