@@ -431,7 +431,15 @@ export default function Funnel() {
       <footer className="px-6 py-4 text-center text-xs text-white/25">
         {brand.domain} · One free scan per business ·{" "}
         <a href="/privacy" className="hover:text-white/60 underline">Privacy</a> ·{" "}
-        <a href="/terms" className="hover:text-white/60 underline">Terms</a>
+        <a href="/terms" className="hover:text-white/60 underline">Terms</a> ·{" "}
+        <a
+          href="https://github.com/kjagsadvisors/aisearchhelpers"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-white/60 underline"
+        >
+          Open source
+        </a>
       </footer>
     </main>
   );
