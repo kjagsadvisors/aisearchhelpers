@@ -34,7 +34,7 @@ export default async function ReportPage({
 
   const report = data.report as FullReport;
   const missed = report.visibility.filter((v) => !v.mentioned);
-  const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL;
+  const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL || "/book";
 
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-white">

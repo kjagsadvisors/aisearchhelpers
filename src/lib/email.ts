@@ -25,7 +25,7 @@ export async function sendReportEmail(
     return;
   }
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const booking = process.env.NEXT_PUBLIC_BOOKING_URL;
+  const booking = process.env.NEXT_PUBLIC_BOOKING_URL || `${base}/book`;
   const reportUrl = `${base}/r/${scanId}`;
   const greeting = firstName ? `Hey ${esc(firstName)},` : "Hey,";
   const missed = report.visibility.filter((v) => !v.mentioned).length;

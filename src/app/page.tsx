@@ -41,7 +41,7 @@ export default function Funnel() {
   const [scanDone, setScanDone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL;
+  const bookingUrl = process.env.NEXT_PUBLIC_BOOKING_URL || "/book";
 
   useEffect(() => {
     inputRef.current?.focus();
