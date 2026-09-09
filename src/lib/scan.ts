@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { crawl, type CrawlResult } from "./crawl";
 import { store } from "./store";
-import { sendReportEmail } from "./email";
+import { sendReportEmail, sendLeadNotification } from "./email";
 import {
   ProfileSchema,
   QueryPlanSchema,
@@ -264,10 +264,39 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     const lead = await store().getLeadForScan(scanId);
     if (lead?.email) {
       await sendReportEmail(lead.email, lead.first_name, scanId, report);
+      await sendLeadNotification({
+        scanId,
+        domain,
+        email: lead.email,
+        firstName: lead.first_name,
+        lastName: lead.last_name,
+        phone: lead.phone,
+        qualifier: lead.qualifier,
+        report: fullReport,
+      });
     }
   } catch (err) {
     console.error(`[scan ${scanId}] failed:`, err);
     const message = err instanceof Error ? err.message : "Scan failed";
     await updateScan(scanId, { status: "error", error: message });
+    // still surface the lead: contact info was captured even though the scan died
+    try {
+      const lead = await store().getLeadForScan(scanId);
+      if (lead?.email) {
+        await sendLeadNotification({
+          scanId,
+          domain,
+          email: lead.email,
+          firstName: lead.first_name,
+          lastName: lead.last_name,
+          phone: lead.phone,
+          qualifier: lead.qualifier,
+          report: null,
+          error: message,
+        });
+      }
+    } catch (notifyErr) {
+      console.error(`[scan ${scanId}] lead notification failed:`, notifyErr);
+    }
   }
 }
