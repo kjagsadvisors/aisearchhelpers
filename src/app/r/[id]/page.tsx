@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { store } from "@/lib/store";
 import { brand, brandWordmark } from "@/lib/brand";
+import { CopyPrompt } from "./CopyPrompt";
 import type { FullReport } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -94,6 +95,26 @@ export default async function ReportPage({
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Verify it yourself — the exact prompts */}
+        <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-4">
+          <h2 className="text-lg font-bold">Don&apos;t take our word for it</h2>
+          <p className="text-sm text-white/60">
+            These are the exact prompts we used. Paste any of them into ChatGPT, Claude, or
+            Perplexity and see who gets recommended.
+          </p>
+          <ul className="space-y-2">
+            {report.visibility.map((v) => (
+              <li
+                key={v.query}
+                className="flex items-center justify-between gap-3 rounded-lg bg-white/[0.04] px-4 py-2.5"
+              >
+                <code className="text-xs text-white/75">{v.query}</code>
+                <CopyPrompt text={v.query} />
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* Priority fixes */}
