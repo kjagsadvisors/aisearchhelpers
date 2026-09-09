@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { store } from "@/lib/store";
-import { brand, brandWordmark } from "@/lib/brand";
+import { brand } from "@/lib/brand";
+import { Logo } from "@/components/Logo";
 import { CopyPrompt } from "./CopyPrompt";
 import type { FullReport } from "@/lib/types";
 
@@ -39,10 +40,7 @@ export default async function ReportPage({
     <main className="min-h-screen bg-[#0a0a0f] text-white">
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-12">
         <header className="flex items-center justify-between">
-          <span className="font-bold tracking-tight text-lg">
-            {brandWordmark().head && <>{brandWordmark().head} </>}
-            <span className="text-[var(--accent)]">{brandWordmark().tail}</span>
-          </span>
+          <Logo />
           <span className="text-sm text-white/40">{data.domain}</span>
         </header>
 

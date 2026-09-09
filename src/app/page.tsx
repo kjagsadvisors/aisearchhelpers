@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { brand, brandWordmark } from "@/lib/brand";
+import { brand } from "@/lib/brand";
+import { Logo } from "@/components/Logo";
 
 type Step = "url" | "email" | "name" | "phone" | "qualifier" | "progress" | "done";
 
@@ -144,7 +145,7 @@ export default function Funnel() {
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
       <header className="px-6 py-5 flex items-center justify-between max-w-3xl mx-auto w-full">
-        <Wordmark />
+        <Logo />
         {stepIndex > 0 && <span className="text-sm text-white/40">{stepIndex} / 5</span>}
       </header>
 
@@ -364,12 +365,3 @@ function MiniProgress({ progress, label }: { progress: number; label: string }) 
   );
 }
 
-function Wordmark() {
-  const { head, tail } = brandWordmark();
-  return (
-    <span className="font-bold tracking-tight text-lg">
-      {head && <>{head} </>}
-      <span className="text-[var(--accent)]">{tail}</span>
-    </span>
-  );
-}
