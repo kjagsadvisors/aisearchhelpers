@@ -9,7 +9,7 @@ import {
 } from "@/lib/abuse";
 import { store } from "@/lib/store";
 import { runScan } from "@/lib/scan";
-import { sendReportEmail } from "@/lib/email";
+import { sendReportEmail, sendLeadNotification } from "@/lib/email";
 import type { Report } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -80,7 +80,19 @@ export async function POST(req: NextRequest) {
 
   const scanId = scan.id;
   if (cached) {
-    after(() => sendReportEmail(email, null, scanId, cached));
+    after(async () => {
+      await sendReportEmail(email, null, scanId, cached);
+      await sendLeadNotification({
+        scanId,
+        domain,
+        email: email.toLowerCase().trim(),
+        firstName: null,
+        lastName: null,
+        phone: null,
+        qualifier: null,
+        report: cached,
+      });
+    });
   } else {
     after(() => runScan(scanId, target.url.toString(), domain));
   }
