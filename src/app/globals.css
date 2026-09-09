@@ -24,3 +24,17 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* White-label accent — overridden per-brand in layout.tsx via env */
+:root {
+  --accent: #34d399;
+  --accent-hover: #6ee7b7;
+  --accent-a06: color-mix(in srgb, var(--accent) 6%, transparent);
+  --accent-a10: color-mix(in srgb, var(--accent) 10%, transparent);
+  --accent-a15: color-mix(in srgb, var(--accent) 15%, transparent);
+  --accent-a25: color-mix(in srgb, var(--accent) 25%, transparent);
+  --accent-a30: color-mix(in srgb, var(--accent) 30%, transparent);
+  --accent-a50: color-mix(in srgb, var(--accent) 50%, transparent);
+  --accent-a60: color-mix(in srgb, var(--accent) 60%, transparent);
+  --accent-a70: color-mix(in srgb, var(--accent) 70%, transparent);
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { brand, brandWordmark } from "@/lib/brand";
 
 type Step = "url" | "email" | "name" | "phone" | "qualifier" | "progress" | "done";
 
@@ -22,7 +23,7 @@ const STAGES = [
 ];
 
 const inputCls =
-  "w-full bg-white/5 border border-white/15 focus:border-emerald-400/60 rounded-xl px-5 py-4 text-lg outline-none transition-colors placeholder:text-white/25";
+  "w-full bg-white/5 border border-white/15 focus:border-[var(--accent-a60)] rounded-xl px-5 py-4 text-lg outline-none transition-colors placeholder:text-white/25";
 
 export default function Funnel() {
   const [step, setStep] = useState<Step>("url");
@@ -143,9 +144,7 @@ export default function Funnel() {
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
       <header className="px-6 py-5 flex items-center justify-between max-w-3xl mx-auto w-full">
-        <span className="font-bold tracking-tight text-lg">
-          AI Search <span className="text-emerald-400">Helpers</span>
-        </span>
+        <Wordmark />
         {stepIndex > 0 && <span className="text-sm text-white/40">{stepIndex} / 5</span>}
       </header>
 
@@ -250,7 +249,7 @@ export default function Funnel() {
                   <button
                     key={q}
                     onClick={() => pickQualifier(q)}
-                    className="text-left px-5 py-3.5 rounded-xl border border-white/10 bg-white/5 hover:bg-emerald-400/10 hover:border-emerald-400/40 transition-colors"
+                    className="text-left px-5 py-3.5 rounded-xl border border-white/10 bg-white/5 hover:bg-[var(--accent-a10)] hover:border-[var(--accent-a50)] transition-colors"
                   >
                     {q}
                   </button>
@@ -264,7 +263,7 @@ export default function Funnel() {
             <StepShell title="Building your report" subtitle="This usually takes about a minute. Don't close the tab.">
               <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                 <div
-                  className="h-full bg-emerald-400 rounded-full transition-all duration-700"
+                  className="h-full bg-[var(--accent)] rounded-full transition-all duration-700"
                   style={{ width: `${Math.max(progress, 4)}%` }}
                 />
               </div>
@@ -274,9 +273,9 @@ export default function Funnel() {
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
                         progress > s.at
-                          ? "bg-emerald-400 text-black"
+                          ? "bg-[var(--accent)] text-black"
                           : progress >= s.at
-                            ? "bg-emerald-400/30 text-emerald-300 animate-pulse"
+                            ? "bg-[var(--accent-a30)] text-[var(--accent-hover)] animate-pulse"
                             : "bg-white/10 text-white/30"
                       }`}
                     >
@@ -293,7 +292,7 @@ export default function Funnel() {
             <StepShell title="Your report is ready." subtitle="We also emailed you a copy so you can find it later.">
               <a
                 href={`/r/${scanId}`}
-                className="block text-center bg-emerald-400 text-black font-semibold rounded-xl px-6 py-4 hover:bg-emerald-300 transition-colors"
+                className="block text-center bg-[var(--accent)] text-black font-semibold rounded-xl px-6 py-4 hover:bg-[var(--accent-hover)] transition-colors"
               >
                 View my AI Search Report →
               </a>
@@ -315,7 +314,7 @@ export default function Funnel() {
       </div>
 
       <footer className="px-6 py-4 text-center text-xs text-white/25">
-        aisearchhelpers.com · One free scan per business
+        {brand.domain} · One free scan per business
       </footer>
     </main>
   );
@@ -346,7 +345,7 @@ function Continue({ onClick, label, disabled }: { onClick: () => void; label: st
     <button
       onClick={onClick}
       disabled={disabled}
-      className="bg-emerald-400 text-black font-semibold rounded-xl px-8 py-3.5 hover:bg-emerald-300 transition-colors disabled:opacity-50"
+      className="bg-[var(--accent)] text-black font-semibold rounded-xl px-8 py-3.5 hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50"
     >
       {label}
     </button>
@@ -358,9 +357,19 @@ function MiniProgress({ progress, label }: { progress: number; label: string }) 
   return (
     <div className="space-y-1.5">
       <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-        <div className="h-full bg-emerald-400/70 rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
+        <div className="h-full bg-[var(--accent-a70)] rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
       </div>
       <p className="text-xs text-white/35">{label}…</p>
     </div>
+  );
+}
+
+function Wordmark() {
+  const { head, tail } = brandWordmark();
+  return (
+    <span className="font-bold tracking-tight text-lg">
+      {head && <>{head} </>}
+      <span className="text-[var(--accent)]">{tail}</span>
+    </span>
   );
 }

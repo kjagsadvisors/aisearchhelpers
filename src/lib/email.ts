@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { brand } from "./brand";
 import type { Report } from "./types";
 
 export async function sendReportEmail(
@@ -21,7 +22,7 @@ export async function sendReportEmail(
   const resend = new Resend(apiKey);
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? "AI Search Helpers <reports@aisearchhelpers.com>",
+      from: process.env.EMAIL_FROM ?? `${brand.name} <reports@${brand.domain}>`,
       to,
       subject: `Your AI Search Report: ${report.overall_score}/100 — ${report.business_name}`,
       html: `
@@ -35,7 +36,7 @@ export async function sendReportEmail(
             <a href="${reportUrl}" style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">View your full report</a>
           </p>
           ${booking ? `<p>Want us to walk you through your top 3 fixes? <a href="${booking}">Grab 15 minutes here</a> — no charge.</p>` : ""}
-          <p style="color:#777;font-size:13px;margin-top:32px">AI Search Helpers · aisearchhelpers.com</p>
+          <p style="color:#777;font-size:13px;margin-top:32px">${brand.name} · ${brand.domain}</p>
         </div>`,
     });
   } catch (err) {

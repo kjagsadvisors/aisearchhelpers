@@ -40,6 +40,23 @@ With no Supabase env vars it runs on an in-memory store (data lost on restart).
 See [.env.example](.env.example) for all configuration, and
 [supabase/migration.sql](supabase/migration.sql) for the schema.
 
+## White-label it
+
+Every customer-facing surface — wordmark, accent color, tagline, domain,
+report attribution, email footer — reads from `NEXT_PUBLIC_BRAND_*` env vars
+(see [.env.example](.env.example)). To run this as your agency's own branded
+report funnel:
+
+```bash
+NEXT_PUBLIC_BRAND_NAME="Apex Digital"
+NEXT_PUBLIC_BRAND_DOMAIN=apexdigital.co
+NEXT_PUBLIC_BRAND_ACCENT=#f59e0b
+NEXT_PUBLIC_BOOKING_URL=https://cal.com/you/intro
+```
+
+Deploy with your own `ANTHROPIC_API_KEY` and Supabase project, point your
+domain at it, and every report it generates carries your brand.
+
 ## Abuse controls
 
 Email MX + disposable-domain validation, per-IP and global daily scan caps,
