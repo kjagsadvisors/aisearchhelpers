@@ -152,7 +152,7 @@ export default async function ReportPage({
               rel="noopener noreferrer"
               className="block text-center bg-[var(--accent)] text-black font-semibold rounded-xl px-6 py-3.5 hover:bg-[var(--accent-hover)] transition-colors"
             >
-              Book a free 15-min walkthrough of these fixes
+              Book a free walkthrough of these fixes
             </a>
           )}
         </section>

@@ -35,7 +35,7 @@ export async function sendReportEmail(
           <p style="margin:24px 0">
             <a href="${reportUrl}" style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">View your full report</a>
           </p>
-          ${booking ? `<p>Want us to walk you through your top 3 fixes? <a href="${booking}">Grab 15 minutes here</a> - no charge.</p>` : ""}
+          ${booking ? `<p>Want us to walk you through your top 3 fixes? <a href="${booking}">Grab a time here</a> - no charge.</p>` : ""}
           <p style="color:#777;font-size:13px;margin-top:32px">${brand.name} · ${brand.domain}</p>
         </div>`,
     });

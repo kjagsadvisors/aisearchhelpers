@@ -417,7 +417,7 @@ export default function Funnel() {
                   rel="noopener noreferrer"
                   className="block text-center border border-white/20 rounded-xl px-6 py-4 hover:bg-white/5 transition-colors"
                 >
-                  Want us to walk you through your top 3 fixes? Book 15 minutes, free
+                  Want us to walk through your report together? Book a time, free
                 </a>
               )}
             </StepShell>
