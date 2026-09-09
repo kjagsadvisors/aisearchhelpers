@@ -3,6 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { crawl, type CrawlResult } from "./crawl";
 import { store } from "./store";
 import { sendReportEmail, sendLeadNotification } from "./email";
+import { syncLeadToCrm } from "./crm";
 import {
   ProfileSchema,
   QueryPlanSchema,
@@ -267,6 +268,17 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
       await sendLeadNotification({
         scanId,
         domain,
+        email: lead.email,
+        firstName: lead.first_name,
+        lastName: lead.last_name,
+        phone: lead.phone,
+        qualifier: lead.qualifier,
+        report: fullReport,
+      });
+      await syncLeadToCrm({
+        scanId,
+        domain,
+        url,
         email: lead.email,
         firstName: lead.first_name,
         lastName: lead.last_name,

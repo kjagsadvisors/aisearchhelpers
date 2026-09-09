@@ -10,6 +10,7 @@ import {
 import { store } from "@/lib/store";
 import { runScan } from "@/lib/scan";
 import { sendReportEmail, sendLeadNotification } from "@/lib/email";
+import { syncLeadToCrm } from "@/lib/crm";
 import type { Report } from "@/lib/types";
 
 export const maxDuration = 300;
@@ -85,6 +86,17 @@ export async function POST(req: NextRequest) {
       await sendLeadNotification({
         scanId,
         domain,
+        email: email.toLowerCase().trim(),
+        firstName: null,
+        lastName: null,
+        phone: null,
+        qualifier: null,
+        report: cached,
+      });
+      await syncLeadToCrm({
+        scanId,
+        domain,
+        url: target.url.toString(),
         email: email.toLowerCase().trim(),
         firstName: null,
         lastName: null,
