@@ -51,6 +51,11 @@ export const ReportSchema = z.object({
       score: z.number().min(0).max(100),
       evidence: z.string(),
       fix: z.string(),
+      fix_prompt: z
+        .string()
+        .describe(
+          "A complete, standalone prompt the business owner can paste into Claude Code (or ChatGPT) to implement this fix. Must include their actual domain and the concrete specifics from the evidence (real page issues, missing schema types, actual heading problems), state the desired outcome, and require nothing else from this report. For non-code fixes (reviews, Reddit presence, directories), make it a prompt that produces the concrete action plan or drafts the content."
+        ),
     })
   ),
   priority_fixes: z

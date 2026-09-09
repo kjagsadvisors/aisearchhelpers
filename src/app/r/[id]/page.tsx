@@ -160,6 +160,17 @@ export default async function ReportPage({
                   <span className="text-[var(--accent-hover)] font-semibold">Fix: </span>
                   {f.fix}
                 </p>
+                {f.fix_prompt && (
+                  <details className="group">
+                    <summary className="cursor-pointer text-xs text-[var(--accent-a70)] hover:text-[var(--accent-hover)] select-none list-none">
+                      ▸ Get the Claude Code prompt to fix this
+                    </summary>
+                    <div className="mt-2 rounded-lg bg-black/40 border border-white/10 p-3 space-y-2">
+                      <pre className="text-[11px] text-white/70 whitespace-pre-wrap font-mono leading-relaxed">{f.fix_prompt}</pre>
+                      <CopyPrompt text={f.fix_prompt} />
+                    </div>
+                  </details>
+                )}
               </div>
             ))}
           </div>
