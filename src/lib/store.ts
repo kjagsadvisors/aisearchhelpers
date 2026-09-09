@@ -200,7 +200,7 @@ let warned = false;
 export function store(): Store {
   if (supabaseConfigured()) return supabaseStore;
   if (!warned) {
-    console.warn("[store] Supabase not configured — using in-memory dev store (data lost on restart)");
+    console.warn("[store] Supabase not configured - using in-memory dev store (data lost on restart)");
     warned = true;
   }
   return memoryStore;

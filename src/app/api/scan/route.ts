@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!(await verifyTurnstile(turnstileToken))) {
-    return NextResponse.json({ error: "Bot check failed — refresh and try again" }, { status: 403 });
+    return NextResponse.json({ error: "Bot check failed. Refresh and try again" }, { status: 403 });
   }
 
   const emailCheck = await validateEmail(email);
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       ip,
     });
   } catch {
-    return NextResponse.json({ error: "Something went wrong — try again" }, { status: 500 });
+    return NextResponse.json({ error: "Something went wrong. Try again" }, { status: 500 });
   }
 
   const cached = (await findCachedReport(domain)) as Report | null;
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       completed_at: cached ? new Date().toISOString() : null,
     });
   } catch {
-    return NextResponse.json({ error: "Something went wrong — try again" }, { status: 500 });
+    return NextResponse.json({ error: "Something went wrong. Try again" }, { status: 500 });
   }
 
   const scanId = scan.id;

@@ -56,7 +56,7 @@ export default async function ReportPage({
           </h1>
         </section>
 
-        {/* Visibility results — the hook */}
+        {/* Visibility results - the hook */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold">
             We asked AI assistants {report.visibility.length} questions your customers ask.
@@ -95,7 +95,7 @@ export default async function ReportPage({
           </div>
         </section>
 
-        {/* Verify it yourself — the exact prompts */}
+        {/* Verify it yourself - the exact prompts */}
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-4">
           <h2 className="text-lg font-bold">Don&apos;t take our word for it</h2>
           <p className="text-sm text-white/60">
@@ -187,14 +187,14 @@ export default async function ReportPage({
               )}
             </div>
             <p className="text-sm text-white/60">
-              How well your site works when an AI agent tries to use it — {report.agent_readiness.score_label.toLowerCase()}.
+              How well your site works when an AI agent tries to use it: {report.agent_readiness.score_label.toLowerCase()}.
             </p>
             {report.agent_readiness.top_issues.length > 0 && (
               <ul className="space-y-2">
                 {report.agent_readiness.top_issues.map((issue) => (
                   <li key={issue.name} className="text-xs text-white/60">
                     <span className="text-white/85 font-medium">{issue.name}</span>
-                    {issue.recommendation && <> — {issue.recommendation}</>}
+                    {issue.recommendation && <>: {issue.recommendation}</>}
                   </li>
                 ))}
               </ul>
@@ -223,7 +223,7 @@ export default async function ReportPage({
               rel="noopener noreferrer"
               className="inline-block bg-[var(--accent)] text-black font-semibold rounded-xl px-8 py-4 hover:bg-[var(--accent-hover)] transition-colors"
             >
-              Get these fixed for you — book a free call
+              Get these fixed for you. Book a free call
             </a>
           )}
           <p className="text-xs text-white/25">

@@ -10,7 +10,7 @@ export async function sendReportEmail(
 ): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.log(`[email] RESEND_API_KEY not set — skipping delivery to ${to}`);
+    console.log(`[email] RESEND_API_KEY not set - skipping delivery to ${to}`);
     return;
   }
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
@@ -24,7 +24,7 @@ export async function sendReportEmail(
     await resend.emails.send({
       from: process.env.EMAIL_FROM ?? `${brand.name} <reports@${brand.domain}>`,
       to,
-      subject: `Your AI Search Report: ${report.overall_score}/100 — ${report.business_name}`,
+      subject: `Your AI Search Report: ${report.overall_score}/100 - ${report.business_name}`,
       html: `
         <div style="font-family:system-ui,-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
           <p>${greeting}</p>
@@ -35,7 +35,7 @@ export async function sendReportEmail(
           <p style="margin:24px 0">
             <a href="${reportUrl}" style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">View your full report</a>
           </p>
-          ${booking ? `<p>Want us to walk you through your top 3 fixes? <a href="${booking}">Grab 15 minutes here</a> — no charge.</p>` : ""}
+          ${booking ? `<p>Want us to walk you through your top 3 fixes? <a href="${booking}">Grab 15 minutes here</a> - no charge.</p>` : ""}
           <p style="color:#777;font-size:13px;margin-top:32px">${brand.name} · ${brand.domain}</p>
         </div>`,
     });

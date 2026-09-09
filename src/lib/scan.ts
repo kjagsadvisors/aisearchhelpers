@@ -16,7 +16,7 @@ import { fetchAgenticReport } from "./agentic";
 import type { FullReport } from "./types";
 
 // Model per stage, overridable by env. The queries stage runs 8+ calls with web
-// search — on a low rate-limit API tier, set SCAN_MODEL_QUERIES to a smaller
+// search - on a low rate-limit API tier, set SCAN_MODEL_QUERIES to a smaller
 // model (e.g. claude-sonnet-5) to keep total scan time near one minute.
 const MODEL_QUERIES = process.env.SCAN_MODEL_QUERIES ?? "claude-opus-5";
 const MODEL_COMPOSE = process.env.SCAN_MODEL_COMPOSE ?? "claude-opus-5";
@@ -100,7 +100,7 @@ Check and report plainly on:
 2. Reddit and Quora: any organic mentions of the brand or domain?
 3. Any other citations of the brand on third-party sites.
 
-Use web search. Report only what you actually find, with sources. If nothing is found for a category, say so explicitly — absence is a finding.`,
+Use web search. Report only what you actually find, with sources. If nothing is found for a category, say so explicitly - absence is a finding.`,
     },
   ];
   for (let i = 0; i < 4; i++) {
@@ -164,7 +164,7 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     await updateScan(scanId, { step: "Understanding your business", progress: 15 });
     const profile = await structured<Profile>(
       ProfileSchema,
-      "You analyze a business website and produce a structured profile. buying_queries must be questions a real consumer would ask an AI assistant when ready to buy — include the location when the business is local.",
+      "You analyze a business website and produce a structured profile. buying_queries must be questions a real consumer would ask an AI assistant when ready to buy - include the location when the business is local.",
       crawlSummary(crawled),
       "low"
     );
@@ -183,7 +183,7 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
         "low"
       );
     } else {
-      // no demand data reachable — fall back to profiler-inferred queries, labeled as such
+      // no demand data reachable - fall back to profiler-inferred queries, labeled as such
       plan = {
         queries: profile.buying_queries.slice(0, 8).map((q) => ({
           query: q,
@@ -213,7 +213,7 @@ export async function runScan(scanId: string, url: string, domain: string): Prom
     await updateScan(scanId, { step: "Scoring and writing your report", progress: 85 });
     const report = await structured<Report>(
       ReportSchema,
-      `You produce an AI Search Visibility report for a business owner. Score honestly from evidence — do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix, and a fix_prompt — a complete standalone prompt the owner pastes into Claude Code to implement the fix on their website. Each fix_prompt must name their actual domain, cite the concrete problems found (their real headings, missing schema types, actual page issues), and describe the desired end state; for non-code fixes it should generate the action plan or draft the content instead. Write fix_prompts as if the reader will paste them with zero other context. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
+      `You produce an AI Search Visibility report for a business owner. Never use em dashes in any output text. Score honestly from evidence - do not inflate or invent. The 9 factors (use these keys/names): backlinks (Domain Authority Signals), homepage_traffic (Search Visibility), social_proof (Reddit & Quora Presence), depth (Content Depth), structure (Structure & Extractability), freshness (Content Freshness), faq (FAQ & Question Coverage), reviews (Review Platform Presence), speed (Page Speed). For each: score 0-100, one sentence of concrete evidence from the inputs, one specific fix, and a fix_prompt - a complete standalone prompt the owner pastes into Claude Code to implement the fix on their website. Each fix_prompt must name their actual domain, cite the concrete problems found (their real headings, missing schema types, actual page issues), and describe the desired end state; for non-code fixes it should generate the action plan or draft the content instead. Write fix_prompts as if the reader will paste them with zero other context. visibility[] must have one entry per query with mentioned=true only if this exact business was recommended in the answer; copy query and backed_by VERBATIM from the input; recommended_instead lists the competitor names that were recommended. headline: one direct second-person sentence stating the core finding. priority_fixes: the 3 changes that would most move AI visibility in 60-90 days. Where evidence is missing for a factor (e.g. backlinks), score conservatively and say the check was indirect.`,
       [
         `BUSINESS PROFILE:\n${JSON.stringify(profile, null, 2)}`,
         `\nTECHNICAL CRAWL:\n${crawlSummary(crawled)}`,

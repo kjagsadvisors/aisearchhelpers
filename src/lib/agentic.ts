@@ -45,7 +45,7 @@ export async function fetchAgenticReport(url: string): Promise<AgenticSummary | 
           }
         }
       } catch {
-        // stream timeout or failure — fall through to a final report check
+        // stream timeout or failure - fall through to a final report check
       }
       report = await getStored(url);
     }

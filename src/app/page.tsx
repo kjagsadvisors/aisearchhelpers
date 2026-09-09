@@ -66,7 +66,7 @@ export default function Funnel() {
           clearInterval(interval);
         }
       } catch {
-        // transient network error — keep polling
+        // transient network error - keep polling
       }
     }, 2500);
     return () => clearInterval(interval);
@@ -100,13 +100,13 @@ export default function Funnel() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong — try again.");
+        setError(data.error ?? "Something went wrong. Try again.");
         return;
       }
       setScanId(data.scanId);
       setStep("name");
     } catch {
-      setError("Network error — try again.");
+      setError("Network error. Try again.");
     } finally {
       setBusy(false);
     }
@@ -146,29 +146,159 @@ export default function Funnel() {
     <main className="min-h-screen bg-[#0a0a0f] text-white flex flex-col">
       <header className="px-6 py-5 flex items-center justify-between max-w-3xl mx-auto w-full">
         <Logo />
-        {stepIndex > 0 && <span className="text-sm text-white/40">{stepIndex} / 5</span>}
+        {stepIndex > 1 && <span className="text-sm text-white/40">{stepIndex} / 5</span>}
       </header>
 
+      {step === "url" && (
+        <div className="flex-1 px-6">
+          <div className="max-w-3xl mx-auto pt-14 sm:pt-20 pb-24 space-y-20">
+            {/* Hero */}
+            <section className="text-center space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-a30)] bg-[var(--accent-a10)] px-4 py-1.5 text-xs font-medium text-[var(--accent-hover)]">
+                Free AI Search Visibility Report
+              </span>
+              <h1 className="font-display text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
+                Is your business <span className="text-[var(--accent)]">invisible</span> in ChatGPT?
+              </h1>
+              <p className="text-white/55 text-lg max-w-xl mx-auto">
+                Your customers now ask AI who to hire. We ask it the same questions, then show
+                you exactly who gets recommended instead of you.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+                <input
+                  ref={inputRef}
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  placeholder="yourwebsite.com"
+                  autoComplete="url"
+                  inputMode="url"
+                  className={`${inputCls} sm:flex-1`}
+                />
+                <button
+                  onClick={advance}
+                  className="bg-[var(--accent)] text-black font-semibold rounded-xl px-7 py-4 hover:bg-[var(--accent-hover)] transition-colors whitespace-nowrap"
+                >
+                  Analyze my site →
+                </button>
+              </div>
+              {error && <p className="text-sm text-red-400">{error}</p>}
+              <p className="text-xs text-white/30">
+                Real search data · Live AI answers · Report ready in about 2 minutes
+              </p>
+            </section>
+
+            {/* How it works */}
+            <section className="grid sm:grid-cols-3 gap-4 text-left">
+              {[
+                {
+                  n: "1",
+                  t: "We find the real questions",
+                  d: "Not guesses. Actual search phrases people type when they're ready to buy what you sell.",
+                },
+                {
+                  n: "2",
+                  t: "We ask AI assistants live",
+                  d: "Each question goes to an AI assistant with web search, exactly how your customers ask it. We record who gets recommended.",
+                },
+                {
+                  n: "3",
+                  t: "You get the report and the fixes",
+                  d: "A score across the 9 factors that drive AI citations, and every fix ships with a ready-to-paste Claude Code prompt.",
+                },
+              ].map((s) => (
+                <div key={s.n} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
+                  <span className="w-7 h-7 rounded-full bg-[var(--accent)] text-black text-sm font-bold flex items-center justify-center">
+                    {s.n}
+                  </span>
+                  <p className="font-semibold">{s.t}</p>
+                  <p className="text-sm text-white/50">{s.d}</p>
+                </div>
+              ))}
+            </section>
+
+            {/* Report preview */}
+            <section className="grid sm:grid-cols-2 gap-8 items-center">
+              <div className="space-y-4 text-left">
+                <h2 className="font-display text-2xl font-bold tracking-tight">
+                  See who AI recommends when your customers ask.
+                </h2>
+                <p className="text-white/50 text-sm leading-relaxed">
+                  Every report shows the exact prompts we used (paste them into ChatGPT and
+                  check us), the competitors recommended in your place, your score on the 9
+                  factors that drive AI citations, and your 3 highest-impact fixes. Backed by a
+                  study of 129,000 websites.
+                </p>
+                <ul className="space-y-2 text-sm text-white/70">
+                  {[
+                    "Grounded in real searches, not invented questions",
+                    "Copy-paste Claude Code prompts to fix every finding",
+                    "AI agent-readiness score included",
+                  ].map((li) => (
+                    <li key={li} className="flex gap-2.5 items-start">
+                      <span className="text-[var(--accent)] mt-0.5">✓</span>
+                      {li}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* stylized mini report */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+                <div className="text-center">
+                  <p className="text-[10px] uppercase tracking-widest text-white/35">AI Search Visibility Score</p>
+                  <p className="text-5xl font-extrabold text-red-400 mt-1">
+                    21<span className="text-lg text-white/30">/100</span>
+                  </p>
+                </div>
+                <div className="rounded-lg bg-white/[0.04] px-3.5 py-2.5 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-white/75">&ldquo;best electrician near me&rdquo;</p>
+                    <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 bg-red-400/15 text-red-300 whitespace-nowrap">
+                      Not mentioned
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-white/35">Recommended instead: 3 competitors</p>
+                </div>
+                {[
+                  { name: "Review Platform Presence", score: 45 },
+                  { name: "Content Structure", score: 38 },
+                  { name: "Freshness", score: 25 },
+                ].map((f) => (
+                  <div key={f.name} className="space-y-1">
+                    <div className="flex justify-between text-[11px] text-white/60">
+                      <span>{f.name}</span>
+                      <span>{f.score}</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${f.score}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Bottom CTA */}
+            <section className="text-center space-y-4">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                Find out in 2 minutes. Fix it this quarter.
+              </h2>
+              <button
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  inputRef.current?.focus();
+                }}
+                className="bg-[var(--accent)] text-black font-semibold rounded-xl px-8 py-4 hover:bg-[var(--accent-hover)] transition-colors"
+              >
+                Get my free report
+              </button>
+            </section>
+          </div>
+        </div>
+      )}
+
+      {step !== "url" && (
       <div className="flex-1 flex items-center justify-center px-6 pb-24">
         <div className="w-full max-w-xl">
-          {step === "url" && (
-            <StepShell
-              title="Is your business invisible in ChatGPT?"
-              subtitle="Enter your website. We'll ask AI assistants the questions your customers ask — and show you who they recommend instead of you."
-            >
-              <input
-                ref={inputRef}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={onKeyDown}
-                placeholder="yourwebsite.com"
-                autoComplete="url"
-                inputMode="url"
-                className={inputCls}
-              />
-              <Continue onClick={advance} label="Analyze my site" />
-            </StepShell>
-          )}
 
           {step === "email" && (
             <StepShell
@@ -242,7 +372,7 @@ export default function Funnel() {
 
           {step === "qualifier" && (
             <StepShell
-              title="Last one — roughly what's your monthly revenue?"
+              title="Last one: roughly what's your monthly revenue?"
               subtitle="This tunes the recommendations in your report."
             >
               <div className="flex flex-col gap-2">
@@ -304,7 +434,7 @@ export default function Funnel() {
                   rel="noopener noreferrer"
                   className="block text-center border border-white/20 rounded-xl px-6 py-4 hover:bg-white/5 transition-colors"
                 >
-                  Want us to walk you through your top 3 fixes? Book 15 minutes — free
+                  Want us to walk you through your top 3 fixes? Book 15 minutes, free
                 </a>
               )}
             </StepShell>
@@ -313,6 +443,7 @@ export default function Funnel() {
           {error && step !== "done" && <p className="mt-4 text-sm text-red-400">{error}</p>}
         </div>
       </div>
+      )}
 
       <footer className="px-6 py-4 text-center text-xs text-white/25">
         {brand.domain} · One free scan per business

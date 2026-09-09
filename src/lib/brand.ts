@@ -1,4 +1,4 @@
-// White-label branding — every customer-facing surface reads from here.
+// White-label branding - every customer-facing surface reads from here.
 // An agency deploys their own instance by setting these env vars; with none
 // set you get the stock AI Search Helpers brand.
 export const brand = {

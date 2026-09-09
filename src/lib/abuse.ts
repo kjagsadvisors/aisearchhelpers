@@ -119,7 +119,7 @@ export async function validateTarget(
 
 export async function verifyTurnstile(token: string | undefined): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true; // not configured — skip
+  if (!secret) return true; // not configured - skip
   if (!token) return false;
   try {
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
@@ -153,7 +153,7 @@ export async function checkRateLimits(
     return { ok: false, reason: "You've hit the daily scan limit. Try again tomorrow." };
   }
   if (globalCount >= maxGlobal) {
-    return { ok: false, reason: "We're at capacity today — try again tomorrow." };
+    return { ok: false, reason: "We're at capacity today. Try again tomorrow." };
   }
 
   await s.recordRateEvents(ip, email);

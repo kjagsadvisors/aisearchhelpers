@@ -29,7 +29,7 @@ export const QueryPlanSchema = z.object({
 });
 export type QueryPlan = z.infer<typeof QueryPlanSchema>;
 
-// Final report shape — stored as jsonb on the scan row
+// Final report shape - stored as jsonb on the scan row
 export const ReportSchema = z.object({
   business_name: z.string(),
   overall_score: z.number().min(0).max(100),
@@ -65,7 +65,7 @@ export const ReportSchema = z.object({
 });
 export type Report = z.infer<typeof ReportSchema>;
 
-// Agent-readiness summary from is-agentic.com — attached after composition,
+// Agent-readiness summary from is-agentic.com - attached after composition,
 // not produced by the composer.
 export interface AgenticSummary {
   score: number | null;

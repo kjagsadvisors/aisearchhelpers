@@ -1,7 +1,7 @@
 import { brandWordmark } from "@/lib/brand";
 
 // Search lens + AI spark, drawn in the brand accent so it adapts to any
-// white-label palette. Pure component — safe in server and client trees.
+// white-label palette. Pure component - safe in server and client trees.
 export function LogoMark({ size = 26 }: { size?: number }) {
   return (
     <svg
@@ -42,9 +42,12 @@ export function Logo({ compact = false }: { compact?: boolean }) {
     <span className="inline-flex items-center gap-2.5">
       <LogoMark size={compact ? 22 : 26} />
       <span
-        className={`font-bold tracking-tight leading-none ${compact ? "text-base" : "text-lg"}`}
+        className={`font-display font-bold uppercase leading-none ${
+          compact ? "text-sm tracking-[0.12em]" : "text-base tracking-[0.14em]"
+        }`}
       >
-        {head && <span className="text-white">{head} </span>}
+        {head && <span className="text-white">{head}</span>}
+        {head && <span className="text-white/30 mx-1.5">/</span>}
         <span className="text-[var(--accent)]">{tail}</span>
       </span>
     </span>

@@ -1,5 +1,5 @@
 // Real-demand grounding for buying queries. Google Autocomplete suggestions
-// only exist because real people type them — we use them as evidence of actual
+// only exist because real people type them - we use them as evidence of actual
 // search demand around the business's services, then phrase the AI-assistant
 // queries from that evidence instead of inventing them.
 import type { Profile } from "./types";
