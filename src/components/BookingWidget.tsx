@@ -28,15 +28,23 @@ function fmtTime(d: Date, tz: string): string {
 const inputCls =
   "w-full bg-white/5 border border-white/15 focus:border-[var(--accent-a60)] rounded-xl px-4 py-3 text-sm outline-none transition-colors placeholder:text-white/25";
 
-export default function BookingWidget() {
+export interface BookingPrefill {
+  name: string;
+  email: string;
+  company: string;
+}
+
+export default function BookingWidget({ prefill }: { prefill?: BookingPrefill | null }) {
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AvailabilityResponse | null>(null);
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [company, setCompany] = useState(prefill?.company ?? "");
+  const [editIdentity, setEditIdentity] = useState(false);
+  const known = Boolean(prefill?.email) && !editIdentity;
   const [confirmation, setConfirmation] = useState<{ joinUrl?: string; whenLabel: string } | null>(null);
 
   useEffect(() => {
@@ -202,32 +210,48 @@ export default function BookingWidget() {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-3">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              required
-              autoComplete="name"
-              className={inputCls}
-            />
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              type="email"
-              required
-              autoComplete="email"
-              className={inputCls}
-            />
-          </div>
-          <input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="Business name (optional)"
-            autoComplete="organization"
-            className={inputCls}
-          />
+          {known ? (
+            <p className="text-xs text-white/40">
+              Booking as <span className="text-white/75">{name || email}</span> · {email}
+              {" "}
+              <button
+                type="button"
+                onClick={() => setEditIdentity(true)}
+                className="underline hover:text-white/70"
+              >
+                Not you?
+              </button>
+            </p>
+          ) : (
+            <>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  required
+                  autoComplete="name"
+                  className={inputCls}
+                />
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className={inputCls}
+                />
+              </div>
+              <input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Business name (optional)"
+                autoComplete="organization"
+                className={inputCls}
+              />
+            </>
+          )}
 
           <button
             type="submit"
