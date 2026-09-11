@@ -51,6 +51,21 @@ export async function GET(req: NextRequest) {
       .maybeSingle();
     if (!lead?.email || lead.followup_sent_at) continue;
 
+    // one follow-up per human, ever: skip if ANY lead row with this email
+    // was already nudged (people re-scan and create multiple lead rows)
+    const emailLc = lead.email.toLowerCase();
+    const { data: alreadyNudged } = await db
+      .from("leads")
+      .select("id")
+      .ilike("email", emailLc)
+      .not("followup_sent_at", "is", null)
+      .limit(1)
+      .maybeSingle();
+    if (alreadyNudged) {
+      await db.from("leads").update({ followup_sent_at: new Date().toISOString() }).eq("id", lead.id);
+      continue;
+    }
+
     const { data: booked } = await db
       .from("bookings")
       .select("id")
@@ -64,7 +79,8 @@ export async function GET(req: NextRequest) {
 
     const report = scan.report as FullReport | null;
     const score = report ? Math.round(report.overall_score) : null;
-    const topFix = report?.priority_fixes?.[0];
+    const topFixRaw = report?.priority_fixes?.[0];
+    const topFix = topFixRaw && topFixRaw.length > 220 ? topFixRaw.slice(0, 217).trimEnd() + "…" : topFixRaw;
     const greeting = lead.first_name ? `Hey ${esc(lead.first_name)},` : "Hey,";
 
     try {
@@ -82,10 +98,10 @@ export async function GET(req: NextRequest) {
               <a href="${esc(`${base}/book?scan=${scan.id}`)}" style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Pick a time</a>
               &nbsp;&nbsp;<a href="${esc(`${base}/r/${scan.id}`)}" style="color:#555">Re-read your report</a>
             </p>
-            <p style="color:#777;font-size:13px;margin-top:32px">${esc(brand.name)} · ${esc(brand.domain)}</p>
+            <p style="color:#777;font-size:13px;margin-top:32px">${esc(brand.name)} · ${esc(brand.domain)}<br/>Don&#39;t want emails from us? <a href="mailto:privacy@${esc(brand.domain)}?subject=Unsubscribe" style="color:#777">Unsubscribe</a> and we&#39;ll stop.</p>
           </div>`,
       });
-      await db.from("leads").update({ followup_sent_at: new Date().toISOString() }).eq("id", lead.id);
+      await db.from("leads").update({ followup_sent_at: new Date().toISOString() }).ilike("email", emailLc);
       sent++;
     } catch (err) {
       console.error(`[followup] send failed for lead ${lead.id}:`, err);
